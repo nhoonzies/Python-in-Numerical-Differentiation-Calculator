@@ -3,9 +3,9 @@
 A modern desktop application for calculating numerical derivatives using the central difference method.
 
 # Created By
-Fidelson, John Paul M.
-Escauriaga Kyle Andrei
-Dagdag, Emanuel Lloyd
+- Fidelson, John Paul M.
+- Escauriaga Kyle Andrei
+- Dagdag, Emanuel Lloyd
 
 ## Features
 
