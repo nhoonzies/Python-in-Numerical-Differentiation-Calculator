@@ -1,3 +1,23 @@
-# Python-in-Numerical-Differentiation-Calculator
- Python Tkinter application provides numerical approximations of derivatives for a wide range of mathematical functions at a specific given point.
-It solves the problem of verifying manual calculus homework by offering a transparent, step-by-step auditing trail (showing Given, Method, Steps, Verification, and Summary). This ensures students and educators can see exactly how the central difference quotient evaluates the derivative, rather than acting as an unexplainable "black box" calculator.
+# Numerical Differentiation Calculator
+
+A modern desktop application for calculating numerical derivatives using the central difference method.
+
+## Features
+
+- Calculate first and second derivatives using the central difference method
+- Modern, customizable dark/light mode interface
+- Step-by-step calculation breakdown
+- Support for complex mathematical expressions
+- Error handling and input validation
+
+## Requirements
+
+- Python 3.7+
+- customtkinter
+
+## Installation
+
+1. Clone this repository or download the source code
+2. Install the required dependencies:
+```bash
+pip install -r requirements.txt
