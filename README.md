@@ -13,7 +13,7 @@ A modern desktop application for calculating numerical derivatives using the cen
 ## Requirements
 
 - Python 3.7+
-- customtkinter
+- tkinter
 
 ## Installation
 
