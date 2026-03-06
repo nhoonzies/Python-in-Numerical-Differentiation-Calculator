@@ -6,9 +6,43 @@ import time
 import sys
 
 
-class NumericalDifferentiator:
+class TrailLogger:
+    """Minimal logger to handle auto-numbering and formatting."""
+
     def __init__(self):
         self.steps = []
+        self.step_num = 1
+
+    def clear(self):
+        self.steps = []
+        self.step_num = 1
+
+    def add_heading(self, heading):
+        # Format the heading. Reset the counter if we hit the STEPS section.
+        prefix = "\n" if heading != "GIVEN" else ""
+        self.steps.append(f"{prefix}{heading}:")
+        if heading == "STEPS":
+            self.step_num = 1
+
+    def add_step(self, text, is_substep=False):
+        # Auto-number main steps, indent sub-steps
+        if is_substep:
+            self.steps.append(f"   {text}")
+        else:
+            self.steps.append(f"{self.step_num}. {text}")
+            self.step_num += 1
+
+    def add_info(self, text):
+        # Regular text without numbering
+        self.steps.append(text)
+
+    def get_trail(self):
+        return "\n".join(self.steps)
+
+
+class NumericalDifferentiator:
+    def __init__(self):
+        self.logger = TrailLogger()
 
     def evaluate(self, x, expr):
         # Safely evaluate the mathematical expression
@@ -30,55 +64,55 @@ class NumericalDifferentiator:
 
     def central_difference(self, f, x, h):
         """Compute derivative using central difference method"""
-        self.steps = []
+        self.logger.clear()
         start_time = time.time()
 
-        self.steps.append("GIVEN:")
-        self.steps.append(f"Function f(x) = {f}")
-        self.steps.append(f"Point x = {x}")
-        self.steps.append(f"Step size h = {h}")
+        self.logger.add_heading("GIVEN")
+        self.logger.add_info(f"Function f(x) = {f}")
+        self.logger.add_info(f"Point x = {x}")
+        self.logger.add_info(f"Step size h = {h}")
 
-        self.steps.append("\nMETHOD:")
-        self.steps.append("Central Difference Approximation")
-        self.steps.append("Formula: f'(x) ≈ [f(x + h) - f(x - h)] / (2h)")
+        self.logger.add_heading("METHOD")
+        self.logger.add_info("Central Difference Approximation")
+        self.logger.add_info("Formula: f'(x) ≈ [f(x + h) - f(x - h)] / (2h)")
 
-        self.steps.append("\nSTEPS:")
+        self.logger.add_heading("STEPS")
         try:
             f_plus = self.evaluate(x + h, f)
-            self.steps.append(f"1. Calculate f(x + h) = f({x + h})")
-            self.steps.append(f"   f({x + h}) = {f_plus:.8f}")
+            self.logger.add_step(f"Calculate f(x + h) = f({x + h})")
+            self.logger.add_step(f"f({x + h}) = {f_plus:.8f}", is_substep=True)
 
             f_minus = self.evaluate(x - h, f)
-            self.steps.append(f"2. Calculate f(x - h) = f({x - h})")
-            self.steps.append(f"   f({x - h}) = {f_minus:.8f}")
+            self.logger.add_step(f"Calculate f(x - h) = f({x - h})")
+            self.logger.add_step(f"f({x - h}) = {f_minus:.8f}", is_substep=True)
 
             derivative = (f_plus - f_minus) / (2 * h)
-            self.steps.append(f"3. Apply central difference formula:")
-            self.steps.append(f"   f'({x}) ≈ [{f_plus:.8f} - ({f_minus:.8f})] / (2 × {h})")
-            self.steps.append(f"   f'({x}) ≈ {derivative:.8f}")
+            self.logger.add_step("Apply central difference formula:")
+            self.logger.add_step(f"f'({x}) ≈ [{f_plus:.8f} - ({f_minus:.8f})] / (2 × {h})", is_substep=True)
+            self.logger.add_step(f"f'({x}) ≈ {derivative:.8f}", is_substep=True)
 
-            self.steps.append("\nFINAL ANSWER:")
-            self.steps.append(f"f'({x}) ≈ {derivative:.8f}")
+            self.logger.add_heading("FINAL")
+            self.logger.add_info(f"f'({x}) ≈ {derivative:.8f}")
 
-            self.steps.append("\nVERIFICATION:")
+            self.logger.add_heading("VERIFICATION")
             h_small = h / 10
             derivative_refined = (self.evaluate(x + h_small, f) -
                                   self.evaluate(x - h_small, f)) / (2 * h_small)
             error_estimate = abs(derivative - derivative_refined)
-            self.steps.append("Checking residual/error using a smaller step size (h/10)...")
-            self.steps.append(f"Refined derivative: {derivative_refined:.8f}")
-            self.steps.append(f"Estimated Error (Residual): {error_estimate:.10e}")
+            self.logger.add_info("Checking residual/error using a smaller step size (h/10)...")
+            self.logger.add_info(f"Refined derivative: {derivative_refined:.8f}")
+            self.logger.add_info(f"Estimated Error (Residual): {error_estimate:.10e}")
 
             end_time = time.time()
             runtime = end_time - start_time
-            self.steps.append("\nSUMMARY:")
-            self.steps.append(f"Runtime: {runtime:.6f} seconds")
-            self.steps.append("Iterations: N/A (Direct Analytical Approximation)")
-            self.steps.append(f"Python version: {sys.version.split()[0]}")
-            self.steps.append(f"NumPy version: {np.__version__}")
-            self.steps.append(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            self.logger.add_heading("SUMMARY")
+            self.logger.add_info(f"Runtime: {runtime:.6f} seconds")
+            self.logger.add_info("Iterations: N/A (Direct Analytical Approximation)")
+            self.logger.add_info(f"Python version: {sys.version.split()[0]}")
+            self.logger.add_info(f"NumPy version: {np.__version__}")
+            self.logger.add_info(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-            return derivative, "\n".join(self.steps)
+            return derivative, self.logger.get_trail()
 
         except Exception as e:
             raise e  # Pass to UI for handling
@@ -198,6 +232,15 @@ class CalculatorApp:
                                       padding="15", style="Card.TLabelframe")
         result_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
+        # --- NEW: Frame to hold the Enlarge Button ---
+        trail_header = ttk.Frame(result_frame)
+        trail_header.pack(fill="x", pady=(0, 5))
+
+        enlarge_btn = ttk.Button(trail_header, text="⛶ Enlarge Log", command=self.open_full_log,
+                                 style="Secondary.TButton")
+        enlarge_btn.pack(side="right")
+        # ---------------------------------------------
+
         self.result_text = scrolledtext.ScrolledText(
             result_frame, wrap=tk.WORD, height=15,
             font=("Consolas", 11), bg="#ffffff", fg="#2c3e50"
@@ -247,6 +290,7 @@ class CalculatorApp:
             self.final_answer_var.set("Input Error")
 
         finally:
+            self.result_text.see(tk.END)  # Added auto-scroll to bottom just in case
             self.result_text.configure(state='disabled')
 
     def clear(self):
@@ -259,6 +303,26 @@ class CalculatorApp:
         self.result_text.configure(state='disabled')
 
         self.final_answer_var.set("Awaiting computation...")
+
+    # --- NEW: Method to pop out the log window ---
+    def open_full_log(self):
+        log_window = tk.Toplevel(self.root)
+        log_window.title("Full Solution Trail")
+        log_window.geometry("800x600")
+        log_window.configure(bg="#f0f0f0")
+
+        full_text = scrolledtext.ScrolledText(
+            log_window, wrap=tk.WORD,
+            font=("Consolas", 12), bg="#ffffff", fg="#2c3e50"
+        )
+        full_text.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # Grab the text from the main window and put it in the new window
+        current_log = self.result_text.get(1.0, tk.END)
+        full_text.insert(tk.END, current_log)
+        full_text.configure(state='disabled')
+
+    # ---------------------------------------------
 
     def run(self):
         self.root.mainloop()
